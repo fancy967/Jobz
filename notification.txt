@@ -1,0 +1,8 @@
+add
+require_once 'notification.class.php';
+in the begining of the php file.
+
+add
+$time = date("Y-m-d h:i:s");
+Notification::generate(null,null,"You post a job [$title] at $time.",null);
+when you want to generate the notification. The first argument is the id of sender, set it to null or 9999 is using the default sender(System). Second argument is the id  of the receiver, set it to null is using the default receiver(the current user). Third argument is the message. The last argument is the time, set it to null the system would generate the time automatically when you call this function.

@@ -1,0 +1,267 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title> My Jobs </title>
+    <meta name="description" content="website description"/>
+    <meta name="keywords" content="website keywords, website keywords"/>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/ecommerce.js"></script>
+    <link type="text/css" href="css/jquery-ui-1.8.1.custom.css" rel="stylesheet"/>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                url: 'city_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $("#panelPost #city").html(data);
+                    $("#panelPost #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+
+                    $("#location_text #city").html(data);
+                    $("#location_text #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+                }
+            });
+
+            $("#location_text #city").change(function () {
+                var new_loca = $("#location_text #city").find("option:selected").text();
+                if (new_loca == 'All Sweden') {
+                    $.cookie('location', '');
+                } else {
+                    $.cookie('location', new_loca);
+                }
+                location.reload();
+            });
+
+            $.ajax({
+                url: 'userjobs_ajax.php',
+                type: 'get',
+                success: update_page
+            });
+
+            $.ajax({
+                url: 'category_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $(".form_post #category").html(data);
+                }
+            });
+
+            $('#start_time').datepicker({
+                showOn: 'both',
+                buttonImage: 'css/calendar.gif',
+                buttonImageOnly: true,
+                changeMonth: true,
+                changeYear: true,
+                showOtherMonths: true,
+                selectOtherMonths: true,
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $('#end_time').datepicker({
+                showOn: 'both',
+                buttonImage: 'css/calendar.gif',
+                buttonImageOnly: true,
+                changeMonth: true,
+                changeYear: true,
+                showOtherMonths: true,
+                selectOtherMonths: true,
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $('#post_submit').click(function () {
+                var title = $('#title').val();
+                var category = $('#category').val();
+                var location = $('#city').val();
+                var salary = $('#salary').val();
+                var stime = $('#start_time').val();
+                var etime = $('#end_time').val();
+                var message = $('#message').val();
+                if (title == '' || category == '' || location == '' || salary == '' || stime == '' || etime == '' || message == '') {
+                    alert('Please input all necessary fields!');
+                    return false;
+                }
+                var params = $('.form_post').serialize();
+                $.ajax({
+                    url: 'addjob_ajax.php',
+                    type: 'post',
+                    data: params,
+                    success: add_job
+                });
+                return false;
+            });
+        });
+
+        function update_page(d) {
+            if (d == -1) {
+                alert("You need to login in in order to see your jobs!");
+                window.location.replace("index.html");
+            } else {
+                var myData = JSON.parse(d);
+                var row;
+                var i = 1;
+                $.each(myData, function () {
+                    row = $('<tr>');
+                    row.append("<td>" + i + "</td>");
+                    row.append("<td>" + this.Job_title + "</td>");
+                    row.append("<td>" + this.Category_Name + "</td>");
+                    row.append("<td>" + this.City_Name + "</td>");
+                    row.append("<td>" + this.Start_Time + "/" + this.End_Time + "</td>");
+                    row.append("<td>" + this.Maximum_Salary + "</td>");
+                    row.append("<td>" + this.Applicants + "</td>");
+                    var finished = this.Is_Finished == 1 ? "Yes" : "No";
+                    row.append("<td>" + finished + "</td>");
+                    row.append($("<td><button type=\"button\" onclick=\"getSingleJob(" + this.Job_id + ");\">View</button></td>"));
+                    row.append('</tr>');
+                    $('#table_jobs').append(row);
+                    i++;
+                });
+            }
+        }
+
+        function getSingleJob(el) {
+            window.location = "display.html?id=" + el;
+        }
+
+        function add_job(d) {
+            if (d == -1) {
+                alert("You need to login in in order to post your jobs!");
+                window.location.replace("index.html");
+            } else if (d == -3) {
+                alert("Please input all necessary fields!");
+            } else if (d == 0) {
+                alert("Add job successed!");
+                window.location.replace("myjobs.html");
+            } else {
+                alert("Error entry!");
+            }
+        }
+
+        function panelSwitch(i) {
+            if (i == 0) {
+                $("#panelJobs").show();
+                $("#panelPost").hide();
+            } else if (i == 1) {
+                $("#panelJobs").hide();
+                $("#panelPost").show();
+            }
+        }
+    </script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+             <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header"></div>
+    <div id="site_content">
+        <div id="content" style="width: 100%;">
+            <div id="panelJobs">
+                <h1> My posted jobs | <a href="javascript: panelSwitch(1)">Post a job </a></h1>
+
+                <p></p>
+                <table id="table_jobs" style="width:100%; border-spacing:0;">
+                    <tbody>
+                    <tr>
+                        <th style="width: 5%;"> ID</th>
+                        <th style="width: 25%;"> Job Title</th>
+                        <th style="width: 15%;"> Category</th>
+                        <th style="width: 10%;"> Location</th>
+                        <th style="width: 20%;"> Period</th>
+                        <th style="width: 10%;"> Salary</th>
+                        <th style="width: 5%;"> #Apply</th>
+                        <th style="width: 5%;"> Finished</th>
+                        <th style="width: 5%;"> View</th>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="panelPost" hidden="hidden">
+                <h1><a href="javascript: panelSwitch(0)">My posted jobs</a> | Post a job </h1>
+
+                <p></p>
+
+                <form class="form_post" method="post" action="#">
+                    <p>
+                        <span style="text-align: left;"> Title </span>
+                        <input class="form_post_long" type="text" name="title" value=""/>
+                        <span> Category </span>
+                        <select name="category" id="category"></select>
+                    </p>
+
+                    <p>
+                        <span style="text-align: left;"> Location </span>
+                        <select name="city" id="city"></select>
+                        <span> Salary </span>
+                        <input class="form_post_short" type="text" name="salary" value=""/>
+                        <span style="width: 40px;padding-left:60px"> From </span>
+                        <input class="form_post_time" type="text" name="start_time" id="start_time" value=""/>
+                        <span style="width: 20px;padding-left:5px"> to </span>
+                        <input class="form_post_time" type="text" name="end_time" id="end_time" value=""/>
+                    </p>
+
+                    <p>
+                        <span style="text-align: left;"> Message </span>
+                        <textarea class="contact textarea" rows="10" cols="50" name="message"></textarea>
+                    </p>
+                    <input name="submit" type="hidden" id="submit"/>
+
+                    <p style="padding-top: 15px">
+                        <span> &nbsp; </span>
+                        <input class="submit" type="submit" id="post_submit" name="contact_submitted" value="submit"/>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="content_footer"></div>
+    <div id="footer">
+        <div id="location_text">
+            <p>
+                Current Location:
+                <select name="city" id="city">
+                </select>
+            </p>
+        </div>
+        <p>
+            Copyright &copy;2014
+        </p>
+    </div>
+</div>
+</body>
+
+</html>

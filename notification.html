@@ -1,0 +1,196 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>
+        Notification Center
+    </title>
+    <meta name="description" content="website description"/>
+    <meta name="keywords" content="website keywords, website keywords"/>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/ecommerce.js"></script>
+    <script type="text/javascript" src="js/jquery.js">
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            if (getValue("getNew") == 1) {
+                setAjax(true);
+            } else {
+                setAjax(false);
+            }
+
+            $.ajax({
+                url: 'city_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $("#location_text #city").html(data);
+                    $("#location_text #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+
+                    $(".form_search #city").html(data);
+                    $(".form_search #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+                }
+            });
+
+            $("#location_text #city").change(function () {
+                var new_loca = $("#location_text #city").find("option:selected").text();
+                if (new_loca == 'All Sweden') {
+                    $.cookie('location', '');
+                } else {
+                    $.cookie('location', new_loca);
+                }
+                location.reload();
+            });
+        });
+
+        function getValue(varname) {
+            var url = window.location.href;
+            var qparts = url.split("?");
+            if (qparts.length <= 1) {
+                return "";
+            }
+            var query = qparts[1];
+            var vars = query.split("&amp;");
+            var value = "";
+            for (i = 0; i < vars.length; i++) {
+                var parts = vars[i].split("=");
+                if (parts[0] == varname) {
+                    value = parts[1];
+                    break;
+                }
+            }
+            value = unescape(value);
+            value.replace(/\+/g, " ");
+            return value;
+        }
+
+        function setAjax(b) {
+            $.ajax({
+                url: 'notification_ajax.php',
+                type: 'get',
+                data: b ? 'getNew=1' : null,
+                success: update_page
+            });
+            b ? $("#navi_title").show() : $("#navi_title").hide();
+        }
+
+        function update_page(d) {
+            if (d == -1) {
+                alert("You need to log in in order to see the notificaiton!");
+                window.location.replace("index.html");
+            } else {
+                $("#table_noti tr:last").after(d);
+                hideTD();
+            }
+        }
+
+        function hideTD() {
+            if ($("tr .ellipsis").length > 0) {
+                $("tr .ellipsis").each(function () {
+                    var objString = $(this).text();
+                    var objLength = $(this).text().length;
+                    var num = 95;
+                    if (objLength > num) {
+                        $(this).attr("title", objString);
+                        $(this).html(objString.substring(0, num) + "... <a href='javascript:void(0)' onclick='javascript:toggle(this,false)'>&lt;+&gt;</a>");
+                    }
+                });
+            }
+        }
+
+        function toggle(obj, b) {
+            var num = 95;
+            var text = $(obj).parent().attr("title");
+            if (b) {
+                var objLength = text.length;
+                if (objLength > num) {
+                    $(obj).parent().html(text.substring(0, num) + "... <a href='javascript:void(0)' onclick='javascript:toggle(this,false)'>&lt;+&gt;</a>");
+                }
+            } else {
+                text += " <a href='javascript:void(0)' onclick='javascript:toggle(this,true)'>&lt;-&gt;</a>";
+                $(obj).parent().html(text);
+            }
+        }
+    </script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+             <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header">
+    </div>
+    <div id="site_content">
+        <div id="content" style="width: 100%;">
+            <h1>
+                Notification Center
+            </h1>
+
+            <div id="navi_title" hidden="true">
+                <h4>
+                    <a href="notification.html">&lt;&lt; All Notification</a>
+                </h4>
+                <br/>
+            </div>
+            <table id="table_noti" style="width:100%; border-spacing:0;">
+                <tbody>
+                <tr>
+                    <th style="width: 15%;">
+                        Sender
+                    </th>
+                    <th>
+                        Description
+                    </th>
+                    <th style="width: 15%;">
+                        Time
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="content_footer"></div>
+    <div id="footer">
+        <div id="location_text">
+            <p>
+                Current Location:
+                <select name="city" id="city">
+                </select>
+            </p>
+        </div>
+        <p>Copyright &copy;2014</p>
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Contact</title>
+    <meta name="description" content="website description"/>
+    <meta name="keywords" content="website keywords, website keywords"/>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/ecommerce.js"></script>
+    <script type="text/javascript" src="js/jquery.js">
+    </script>
+    <script type="text/javascript" src="js/jquery.cookie.js">
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $.ajax({
+                url: 'city_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $("#location_text #city").html(data);
+                    $("#location_text #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+
+                    $(".form_search #city").html(data);
+                    $(".form_search #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+                }
+            });
+
+            $("#location_text #city").change(function () {
+                var new_loca = $("#location_text #city").find("option:selected").text();
+                if (new_loca == 'All Sweden') {
+                    $.cookie('location', '');
+                } else {
+                    $.cookie('location', new_loca);
+                }
+                location.reload();
+            });
+
+        });
+    </script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+             <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header"></div>
+    <div id="site_content">
+        <div id="content" style="width: 100%;">
+            <h1>Contact Information</h1>
+
+            <p>Address: Vaksalagatan 12<br/>753 29 Uppsala<br/>Telephone number: 0756289762 </p>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2003.3607840756367!2d17.640392700000003!3d59.859755299999996!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465fcbf771d19e75%3A0x56daee90c6bdd04!2sVaksalagatan+12!5e0!3m2!1sen!2sse!4v1401399556864"
+                    width="100%" height="450" style="border:0;text-align: center;"></iframe>
+        </div>
+    </div>
+    <div id="content_footer"></div>
+    <div id="footer">
+        <div id="location_text">
+            <p>
+                Current Location:
+                <select name="city" id="city">
+                </select>
+            </p>
+        </div>
+        <p>Copyright &copy; 2014</p>
+    </div>
+</div>
+</body>
+</html>

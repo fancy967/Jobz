@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<title> My Jobs </title>
+		<meta name="description" content="website description" />
+		<meta name="keywords" content="website keywords, website keywords" />
+		<meta http-equiv="content-type" content="text/html; charset=windows-1252" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script type = "text/javascript" src = "js/ecommerce.js"></script>
+		<link type="text/css" href="css/jquery-ui-1.8.1.custom.css" rel="stylesheet" />
+		<script type="text/javascript" src="js/calendar.js"></script>
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript"></script>
+
+	</head>
+
+	<body>
+		<div id="main">
+			<div id="header">
+				<div id="logo">
+					<div id="logo_text">
+						<h1>Online<font color="green">Jobs</h1>
+						<h2>Choose the job that fits you.</h2>
+					</div>
+				</div>
+				<div id="menubar">
+				 <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+				</div>
+			</div>
+			<div id="content_header"></div>
+			<div id="site_content">
+				<div id="content" style="width: 100%;">
+					<h1> User Profile </h1>
+					<table id="table_jobs" style="width:100%; border-spacing:0;">
+						<tbody>
+							<tr>
+								<th style="width: 15%;"> Name </th>
+								<th style="width: 10%;"> Email </th>
+								<th style="width: 25%;"> Address </th>
+								<th style="width: 10%;"> Rating </th>
+								<th style="width: 15%;"> Phone Number </th>
+								<th style="width: 15%;"> Date Of Birth </th>
+
+							</tr>
+						</tbody>
+					</table>
+
+					<!-- insert the page content here -->
+
+					<div id="mainContent">
+						<h1> Comments </h1>
+						<table id="comment_table" style="width:100%; border-spacing:0;">
+							<tbody>
+								<tr>
+									<th style="width: 50%;"> Employer Name </th>
+									<th style="width: 50%;"> Comment </th>
+
+								</tr>
+							</tbody>
+						</table>
+						<div id="write_comment">
+							<h1> Write a comment for this user </h1>
+
+							<form role="form"  method = "post" action="addJob.php" id = "userCommentForm">
+
+								<div class="txtarea" style="width: 100%; float: left">
+									<textarea name="comment" rows="10" class="form-control" id="comment"
+                                  placeholder="add your comments here"></textarea>
+								</div>
+						
+							</form>
+
+						</div>
+
+						<script>
+							var myButton = document.getElementById("clickButton");
+							var myText = document.getElementById("jobs");
+							//myButton.addEventListener('click', getJobs, false);
+							var url = window.location.href;
+							var lastChar = url.substr(url.indexOf("=") + 1);
+							var formHeader = "</div><input name=\"user_id\" type=\"hidden\" id=\"user_id\" value ="+ lastChar +"><input name=\"add_user_comment\" type=\"hidden\" id=\"submit\"><div class=\"form-group\" style=\"width: 70%; float: left\"><button type=\"submit\" class=\"btn btn-primary\"  >Add Comment</button></div>";
+							$("#userCommentForm").append(formHeader);
+
+							getJobs(lastChar);
+														getComments(lastChar);
+
+
+							function getJobs(lastChar) {
+
+								var request = new XMLHttpRequest();
+								var url = "showProfile.php?profileId=" + lastChar;
+
+								request.open("POST", url, true);
+								request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+								request.onreadystatechange = function() {
+									if (request.readyState == 4 && request.status == 200) {
+
+										showJobs(request.responseText);
+									}
+								}
+								request.send();
+							}
+
+							function showJobs(response) {
+								//onsole.log(response);
+								//var jsonData = JSON.parse(response);
+								// Find a <table> element with id="myTable":
+								var table = document.getElementById("table_jobs");
+								console.log(response);
+								var myData = JSON.parse(response);
+								$(document).ready(function() {
+
+									$.each(myData, function() {
+										var row = $("<tr  />");
+										$("#table_jobs").append(row);
+
+										//this will append tr element to table... keep its reference for a while since we will add cels into it
+										row.append("<td>" + this.Name + "</td>");
+										row.append("<td>" + this.Email + "</td>");
+										row.append("<td>" + this.Address + "</td>");
+										row.append("<td>" + this.Rating + "</td>");
+										row.append("<td>" + this.Phone_Number + "</td>");
+										row.append("<td>" + this.Date_Of_Birth + "</td>");
+
+									});
+								});
+							}
+							
+							function getComments(lastChar) {
+
+							var request = new XMLHttpRequest();
+							var url = "singleJobComment.php?jobId=" + lastChar;
+
+							request.open("POST", url, true);
+							request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+							request.onreadystatechange = function() {
+								if (request.readyState == 4 && request.status == 200) {
+
+									showComments(request.responseText);
+								}
+							}
+							request.send();
+						}
+
+						function showComments(response) {
+							//onsole.log(response);
+							//var jsonData = JSON.parse(response);
+							// Find a <table> element with id="myTable":
+							var table = document.getElementById("comment_table");
+							console.log(response);
+							var myData = JSON.parse(response);
+							$(document).ready(function() {
+			
+								$.each(myData, function() {
+									var row = $("<tr  />");
+									$("#comment_table").append(row);
+									//this will append tr element to table... keep its reference for a while since we will add cels into it
+									row.append($("<td>" + this.Name + "</td>"));
+									row.append($("<td>" + this.Comment + "</td>"));
+
+								});
+							});
+						}
+
+
+						</script>
+
+					</div>
+				</div>
+				<div id="content_footer"></div>
+				<div id="footer">
+					<p>
+						<a href="index.html">Home</a> | <a href="examples.html">Examples</a> | <a href="page.html">A Page</a> | <a href="jobManagement.html">Post Job</a> | <a href="contact.html">Contact Us</a>
+					</p>
+					<p>
+						Copyright &copy; simplestyle_banner | <a href="http://validator.w3.org/check?uri=referer">HTML5</a> | <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> | <a href="http://www.html5webtemplates.co.uk">design from HTML5webtemplates.co.uk</a>
+					</p>
+				</div>
+			</div>
+	</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>Update profile</title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <script type = "text/javascript" src = "javascript/ecommerce.js"></script>
+</head>
+
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+            <h1>Online<font color="green">Jobs</h1>
+          <h2>Choose the job that fits you.</h2>
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+      </div>
+    </div>
+    <div id="content_header"></div>
+    <br />
+    <br />
+     <br />
+    <br />
+    <center>
+<form method="post" name="update" action="update_profile.php" />
+Name: <input type="text" name="person_name"><br />
+E-mail: <input type="text" name="email"> <br />
+Address: <input type="text" name="address"><br />
+Postal Code: <input type="text" name="postal_code"> <br />
+Number of Jobs: <input type="text" name="number_of_jobs"><br />
+Phone number: <input type="text" name="phone_number"> <br />
+Date of birth: <input type="text" name="date_of_birth"><br />
+Username: <input type="text" name="username"><br />
+Password: <input type="text" name="password"><br />
+
+<input type="submit" name="Submit" value="update" />
+</form>
+ </center>
+ </div>
+</body>
+</html>

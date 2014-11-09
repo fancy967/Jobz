@@ -1,0 +1,443 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+<title>
+    Home
+</title>
+<meta name="description" content="website description"/>
+<meta name="keywords" content="website keywords, website keywords"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="stylesheet" type="text/css" href="css/style.css"/>
+<link rel="stylesheet" type="text/css" href="css/jquery-impromptu.css"/>
+<script type="text/javascript" src="js/ecommerce.js">
+</script>
+<script type="text/javascript" src="js/jquery.js">
+</script>
+<script type="text/javascript" src="js/jquery.cookie.js">
+</script>
+<script type="text/javascript" src="js/jquery-impromptu.js">
+</script>
+<script type="text/javascript">
+(function ($) {
+    $.fn.extend({
+        Scroll: function (opt, callback) {
+            if (!opt) var opt = {};
+            var _this = this.eq(0).find("ul:first");
+            var lineH = _this.find("li:first").height(),
+                    line = opt.line ? parseInt(opt.line, 10) : parseInt(this.height() / lineH, 10),
+                    speed = opt.speed ? parseInt(opt.speed, 10) : 500,
+                    timer = opt.timer ? parseInt(opt.timer, 10) : 3000;
+            if (line == 0) line = 1;
+            var upHeight = 0 - line * lineH;
+
+            scrollUp = function () {
+                _this.animate({
+                    marginTop: upHeight
+                }, speed, function () {
+                    for (i = 1; i <= line; i++) {
+                        _this.find("li:first").appendTo(_this);
+                    }
+                    _this.css({
+                        marginTop: 0
+                    });
+                });
+            }
+
+            _this.hover(function () {
+                clearInterval(timerID);
+            }, function () {
+                timerID = setInterval("scrollUp()", timer);
+            }).mouseout();
+        }
+    })
+})(jQuery);
+
+$(document).ready(function () {
+
+    var cur_loca = $.cookie('location');
+    if (cur_loca == null) {
+        $.getJSON("http://ip-api.com/json/?callback=?", function (data) {
+            if (data['status'] == 'success') {
+                $.prompt("Do you want to set current location to: " + data['city'], {
+                    title: "Location setting",
+                    buttons: {
+                        "Yes": 1,
+                        "No": -1,
+                        "Ask later": 0
+                    },
+                    submit: function (e, v, m, f) {
+                        if (v == 1) {
+                            $.cookie('location', data['city']);
+                        } else if (v == -1) {
+                            $.cookie('location', '');
+                        }
+                        loadNewsNCity();
+                    }
+                });
+            }
+        });
+    }
+
+    loadNewsNCity();
+
+    $("#location_text #city").change(function () {
+        var new_loca = $("#location_text #city").find("option:selected").text();
+        if (new_loca == 'All Sweden') {
+            $.cookie('location', '');
+        } else {
+            $.cookie('location', new_loca);
+        }
+        location.reload();
+    });
+
+    $.ajax({
+        url: 'login_ajax.php',
+        type: 'get',
+        success: update_page
+    });
+
+    $('#form_login #login_submit').click(function () {
+        var email = $('#form_login #email').val();
+        var password = $('#form_login #password').val();
+        if (email == '') {
+            alert('Email empty!');
+            return false;
+        }
+        if (password == '') {
+            alert('Paaword empty!');
+            return false;
+        }
+        var params = $('#form_login input').serialize();
+        $.ajax({
+            url: 'login_ajax.php',
+            type: 'post',
+            data: params,
+            success: update_page
+        });
+        return false;
+    });
+
+    $('#form_reg #reg_submit').click(function () {
+        var email = $('#form_reg #email').val();
+        var password = $('#form_reg #password').val();
+        var repassword = $('#form_reg #repassword').val();
+        var name = $('#form_reg #name').val();
+        var city = $('#form_reg #city').val();
+        if (email == '') {
+            alert('Email empty!');
+            return false;
+        }
+        if (password == '') {
+            alert('Paaword empty!');
+            return false;
+        }
+        if (password != repassword) {
+            alert('Two paawords are not the same!');
+            return false;
+        }
+        if (name == '') {
+            alert('Paaword empty!');
+            return false;
+        }
+        if (city == '') {
+            alert('City empty!');
+            return false;
+        }
+        var params = $('#form_reg').serialize();
+        $.ajax({
+            url: 'reg_ajax.php',
+            type: 'post',
+            data: params,
+            success: update_page
+        });
+        return false;
+    });
+
+});
+
+function loadNewsNCity() {
+    $.ajax({
+        url: 'city_ajax.php',
+        type: 'get',
+        success: function (data) {
+            $("#form_reg #city").html(data);
+            $("#location_text #city").html(data);
+            $("#location_text #city").find("option").filter(function (index) {
+                return $(this).text() === $.cookie('location');
+            }).prop("selected", "selected");
+            $("#form_reg #city").find("option").filter(function (index) {
+                return $(this).text() === $.cookie('location');
+            }).prop("selected", "selected");
+        }
+    });
+
+    $.ajax({
+        url: 'newjobs_ajax.php',
+        type: 'get',
+        success: function (data) {
+            $("#scrollDiv").html(data);
+            $("#scrollDiv").Scroll({
+                line: 1,
+                speed: 500,
+                timer: 3000
+            });
+        }
+    });
+}
+
+function logOut() {
+    $.ajax({
+        url: 'logOut.php',
+        type: 'get',
+        success: update_page
+    });
+}
+
+function update_page(data) {
+    if (data == -1) {
+        $("#panelUser").hide();
+        $("#panelLogin").show();
+        $("#panelRegister").hide();
+        alert('Sorry, you must enter a valid username and password to log in!');
+        return false;
+    } else if (data == 0) {
+        $("#panelUser").hide();
+        $("#panelLogin").show();
+        $("#panelRegister").hide();
+    } else if (data == -999) {
+        alert('You have logined out successfully!');
+        $("#panelUser").hide();
+        $("#panelLogin").show();
+        $("#panelRegister").hide();
+    } else if (data == -2) {
+        $("#panelUser").hide();
+        $("#panelLogin").hide();
+        $("#panelRegister").show();
+        alert('Error enrty!');
+        return false;
+    } else if (data == -11) {
+        $("#panelUser").hide();
+        $("#panelLogin").hide();
+        $("#panelRegister").show();
+        alert('Sorry, you must input all field!');
+        return false;
+    } else if (data == 11) {
+        $("#panelUser").hide();
+        $("#panelLogin").show();
+        $("#panelRegister").hide();
+        $('#form_reg')[0].reset();
+        alert('You have sing up successfully! Now you can login in!');
+        return false;
+    } else {
+        $("#panelUser").show();
+        $("#panelLogin").hide();
+        $("#login_status").html(data);
+    }
+}
+
+function panelSwitch(i) {
+    if (i == 0) {
+        $("#panelLogin").show();
+        $("#panelRegister").hide();
+    } else if (i == 1) {
+        $("#panelLogin").hide();
+        $("#panelRegister").show();
+    }
+}
+</script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+            <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header">
+    </div>
+    <div id="site_content">
+        <div id="banner">
+        </div>
+        <div id="sidebar_container">
+            <div class="sidebar" id="panelLogin">
+                <div class="sidebar_top">
+                </div>
+                <div class="sidebar_item">
+                    <h3>
+                        Log in|
+                        <a href="javascript:panelSwitch(1)">Sign Up</a>
+                    </h3>
+
+                    <form id="form_login" action="#" method="post">
+                        <p>
+                  <span>
+                    Email
+                  </span>
+                            <input class="contact" type="text" name="email" id="email" value=""/>
+                        </p>
+
+                        <p>
+                  <span>
+                    Password
+                  </span>
+                            <input class="contact" type="password" name="password" id="password" value=""/>
+                        </p>
+                        <input name="submit" type="hidden" id="submit"/>
+
+                        <p style="padding-top: 15px">
+                            <input class="submit" type="submit" id="login_submit" name="submit" value="submit"/>
+                        </p>
+                    </form>
+                </div>
+                <div class="sidebar_base">
+                </div>
+            </div>
+            <div class="sidebar" id="panelUser" style="display: none;">
+                <div class="sidebar_top">
+                </div>
+                <div class="sidebar_item">
+                    <h3>
+                        User Info
+                    </h3>
+
+                    <div id="login_status">
+                        <h4>
+                            XXXX
+                        </h4>
+                        <a href="user_profile.php">Edit Profile</a>
+                        &nbsp;|&nbsp;
+                        <a href="javascript:logOut()">Log Out</a>
+                        &nbsp;|&nbsp;
+                        <a href="notification.html" id="noti_new">Inbox</a>
+                    </div>
+                </div>
+                <div class="sidebar_base">
+                </div>
+            </div>
+            <div class="sidebar" id="panelRegister" style="display: none;">
+                <div class="sidebar_top">
+                </div>
+                <div class="sidebar_item">
+                    <h3>
+                        <a href="javascript:panelSwitch(0)">Log in</a>
+                        |Sign Up
+                    </h3>
+
+                    <form id="form_reg" action="#" method="post">
+                        <p>
+                  <span>
+                    Email
+                  </span>
+                            <input class="contact" type="text" name="email" id="email" value=""/>
+                        </p>
+
+                        <p>
+                  <span>
+                    Name
+                  </span>
+                            <input class="contact" type="text" name="name" id="name" value=""/>
+                        </p>
+
+                        <p>
+                  <span>
+                    Password
+                  </span>
+                            <input class="contact" type="password" name="password" id="password" value=""/>
+                        </p>
+
+                        <p>
+                  <span>
+                    Re Password
+                  </span>
+                            <input class="contact" type="password" name="repassword" id="repassword" value=""/>
+                        </p>
+
+                        <p>
+                  <span>
+                    City
+                  </span>
+                            <select name="city" id="city">
+                            </select>
+                        </p>
+                        <input name="submit" type="hidden" id="submit"/>
+
+                        <p style="padding-top: 15px">
+                            <input class="submit" type="submit" id="reg_submit" name="submit" value="submit"/>
+                        </p>
+                    </form>
+                </div>
+                <div class="sidebar_base">
+                </div>
+            </div>
+            <div class="sidebar">
+                <div class="sidebar_top">
+                </div>
+                <div class="sidebar_item" id="newJobs">
+                    <!-- insert your sidebar items here -->
+                    <h3>
+                        Latest Jobs
+                    </h3>
+
+                    <div id="scrollDiv">
+                        <h4>
+                            Website launch
+                        </h4>
+                        <h5>
+                            June 4th, 2014
+                        </h5>
+                    </div>
+                </div>
+                <div class="sidebar_base">
+                </div>
+            </div>
+        </div>
+        <div id="content">
+            <!-- insert the page content here -->
+            <h1>
+                Welcome to the online Job searching website
+            </h1>
+        </div>
+    </div>
+    <div id="content_footer">
+    </div>
+    <div id="footer">
+        <div id="location_text">
+            <p>
+                Current Location:
+                <select name="city" id="city">
+                </select>
+            </p>
+        </div>
+        <p>
+            Copyright &copy; 2014
+        </p>
+    </div>
+</div>
+</body>
+
+</html>

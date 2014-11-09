@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Contact</title>
+    <meta name="description" content="website description"/>
+    <meta name="keywords" content="website keywords, website keywords"/>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="javascript/ecommerce.js"></script>
+    <script type="text/javascript" src="js/jquery.js">
+    </script>
+    <script type="text/javascript" src="js/jquery.cookie.js">
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $.ajax({
+                url: 'city_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $("#location_text #city").html(data);
+                    $("#location_text #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+
+                    $(".form_search #city").html(data);
+                    $(".form_search #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+                }
+            });
+
+            $("#location_text #city").change(function () {
+                var new_loca = $("#location_text #city").find("option:selected").text();
+                if (new_loca == 'All Sweden') {
+                    $.cookie('location', '');
+                } else {
+                    $.cookie('location', new_loca);
+                }
+                location.reload();
+            });
+
+        });
+    </script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+            <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header"></div>
+    <div id="site_content">
+        <h1>Contact Form</h1>
+        <center>
+            <form action="mailto:mariannakapa12@gmail.com">
+                Name: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="name"/><br/>
+                E-mail Topic:&nbsp; <input type="text" name="messagesubject"/> <br/>
+                Your e-mail: &nbsp;&nbsp;&nbsp;<input type="text" name="email"/>
+                <br/>
+                <br/>
+                <textarea rows="10" cols="30">You can write here your message so that we can contact you! </textarea>
+
+                <br/>
+                <br/>
+                <input type="submit" name="submit" value="Send"/>
+                <input type="reset" name="clear" value="Clear"/>
+        </center>
+        </form>
+    </div>
+</div>
+<div id="content_footer"></div>
+<div id="footer">
+    <div id="location_text">
+        <p>
+            Current Location:
+            <select name="city" id="city">
+            </select>
+        </p>
+    </div>
+    <p>Copyright &copy;2014</p>
+</div>
+</div>
+</body>
+</html>

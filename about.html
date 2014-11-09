@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>About</title>
+    <meta name="description" content="website description"/>
+    <meta name="keywords" content="website keywords, website keywords"/>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/ecommerce.js"></script>
+    <script type="text/javascript" src="js/jquery.js">
+    </script>
+    <script type="text/javascript" src="js/jquery.cookie.js">
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $.ajax({
+                url: 'city_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $("#location_text #city").html(data);
+                    $("#location_text #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+
+                    $(".form_search #city").html(data);
+                    $(".form_search #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+                }
+            });
+
+            $("#location_text #city").change(function () {
+                var new_loca = $("#location_text #city").find("option:selected").text();
+                if (new_loca == 'All Sweden') {
+                    $.cookie('location', '');
+                } else {
+                    $.cookie('location', new_loca);
+                }
+                location.reload();
+            });
+
+        });
+        </script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+          <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header"></div>
+    <div id="site_content">
+        <div id="content" style="width: 100%;">
+            <h1>About us</h1>
+
+            <p>This website has to do with online jobs. You can either sign up as a job seeker or as a "job giver."</p>
+
+            <p>The registration to the website is currently free and there is possibility in the near future to provide
+                premium services with a certain fee. As a job seeker you can sign up to the website and then look for
+                jobs and apply to the ones that suit you. As a "job giver" you are able to post jobs to our website.</p>
+                <img src="css/about.jpg" width="880"/>
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+
+    <div id="content_footer"></div>
+    <div id="footer">
+        <div id="location_text">
+            <p>
+                Current Location:
+                <select name="city" id="city">
+                </select>
+            </p>
+        </div>
+        <p>Copyright &copy; 2014</p>
+    </div>
+</div>
+</body>
+</html>

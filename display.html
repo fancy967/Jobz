@@ -1,0 +1,286 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>
+        Job detail
+    </title>
+    <meta name="description" content="website description"/>
+    <meta name="keywords" content="website keywords, website keywords"/>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <script type="text/javascript" src="js/ecommerce.js"></script>
+    <script type="text/javascript" src="js/jquery.js">
+    </script>
+    <script type="text/javascript" src="js/jquery.cookie.js">
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $.ajax({
+                url: 'city_ajax.php',
+                type: 'get',
+                success: function (data) {
+                    $("#location_text #city").html(data);
+                    $("#location_text #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+
+                    $(".form_search #city").html(data);
+                    $(".form_search #city").find("option").filter(function (index) {
+                        return $(this).text() === $.cookie('location');
+                    }).prop("selected", "selected");
+                }
+            });
+
+            $("#location_text #city").change(function () {
+                var new_loca = $("#location_text #city").find("option:selected").text();
+                if (new_loca == 'All Sweden') {
+                    $.cookie('location', '');
+                } else {
+                    $.cookie('location', new_loca);
+                }
+                location.reload();
+            });
+
+            $('#proposed_submit').click(function () {
+                var params = $('#form_apply').serialize();
+                $.ajax({
+                    url: 'addjob.php',
+                    type: 'post',
+                    data: params,
+                    success: function(d)
+                    {
+                        alert(d);
+                        location.reload();
+                    }
+                });
+                return false;
+            });
+
+
+        });
+
+
+        var p = getValue("id");
+        if (p != null) {
+            $.ajax({
+                url: 'job_ajax.php',
+                type: 'post',
+                data: p ? 'getID=' + p : null,
+                success: update_page
+            });
+        }
+
+        function update_page(d) {
+            if (d == -1) {
+                alert("You need to log in in order to see the job detail!");
+                window.location.replace("index.html");
+            } else if (d == -999) {
+                alert("Some error happen.");
+            } else {
+                var myData = JSON.parse(d);
+                $("#job_title").html("Job title: " + myData.jobDetail[0].Job_title);
+                $("#job_author").html(
+                                "Added by " + myData.jobDetail[0].Name + " at " + myData.jobDetail[0].Date_created +
+                                "<br>Category: " + myData.jobDetail[0].Category_Name + ", Location: " + myData.jobDetail[0].City_Name +
+                                "<br>From: " + myData.jobDetail[0].Start_Time + " to " + myData.jobDetail[0].End_Time
+                );
+                $("#job_salary").html("Maximum Salary: " + myData.jobDetail[0].Maximum_Salary);
+                $("#job_description").html(myData.jobDetail[0].Description);
+
+                var isEmployer = myData.userID == myData.jobDetail[0].Employer_id;
+                var workerID = myData.jobDetail[0].Worker_Id;
+                var row;
+                var i = 1;
+                $.each(myData.applicants, function () {
+                    row = $('<tr>');
+                    row.append("<td>" + i + "</td>");
+                    row.append($("<td><button type=\"button\" onclick=\"viewApplicant(" + this.Person_Id + ");\">"+this.Name+"</button></td>"));
+                    row.append("<td>-----</td>");
+                    row.append("<td>" + this.Comment + "</td>");
+                    row.append("<td>" + this.Proposed_Salary + "</td>");
+                    if (isEmployer && !workerID)
+                    {
+                        row.append($("<td><button type=\"button\" onclick=\"chooseJob(" + this.Person_Id + ","+ myData.jobDetail[0].Job_id + ");\">Choose</button></td>"));
+                    }else if (isEmployer && workerID)
+                    {
+                        row.append($("<td><button type=\"button\" disabled>Choose</button></td>"));
+                    }else
+                    {
+                        row.append("<td></td>");
+                    }
+                    row.append('</tr>');
+                    $('#job_applicants').append(row);
+                    i++;
+                });
+
+                if (isEmployer) {
+                    $("#job_apply").hide();
+                } else {
+                    $("#job_apply").show();
+                    $("#Job_Id").val(myData.jobDetail[0].Job_id);
+                    $("#employer_id").val(myData.jobDetail[0].Employer_id);
+                }
+            }
+        }
+
+        function chooseJob(a,b) {
+            $.ajax({
+                url: 'addjob.php',
+                type: 'post',
+                data: 'add_applicant=&Worker_Id=' + a + '&Job_Id='+b,
+                success: function(d)
+                {
+                    alert(d);
+                    location.reload();
+                }
+            });
+        }
+        
+        function viewApplicant(a) {
+				window.location = "showProfile.html?profileId=" + a;
+
+        }
+        
+
+        function getValue(varname) {
+            var url = window.location.href;
+            var qparts = url.split("?");
+            if (qparts.length <= 1) {
+                return "";
+            }
+            var query = qparts[1];
+            var vars = query.split("&amp;");
+            var value = "";
+            for (i = 0; i < vars.length; i++) {
+                var parts = vars[i].split("=");
+                if (parts[0] == varname) {
+                    value = parts[1];
+                    break;
+                }
+            }
+            value = unescape(value);
+            value.replace(/\+/g, " ");
+            return value;
+        }
+    </script>
+</head>
+
+<body>
+<div id="main">
+    <div id="header">
+        <div id="logo">
+            <div id="logo_text">
+                <h1>
+                    <a href="index.html">Online<span class="logo_colour">Jobs</span></a>
+                </h1>
+
+                <h2>
+                    Choose the job that fits you.
+                </h2>
+            </div>
+        </div>
+        <div id="menubar">
+           <ul id="menu">
+           <li><a href="index.html">Home</a></li>
+           <li><a href="about.html">About</a></li>
+           <li><a href="search.html">Find jobs</a></li>
+           <li><a href="myjobs.html">My Jobs</a></li>
+            <li><a href="#" onmouseover="contact('contactmenu')" onmouseout="mclosetime()">Contact</a>
+                <div id="contactmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                    <a href="contact.html">Information</a>
+                    <a href="contact_form.html">Form</a>
+                    <a href="terms_of_use.html">Terms of Use</a>
+               </div>
+           </li>   
+        </ul>
+        </div>
+    </div>
+    <div id="content_header">
+    </div>
+    <div id="site_content">
+        <div id="content" style="width: 100%;">
+            <h1 id="job_title">
+                Job Title
+            </h1>
+            <h4 id="job_author">
+                Added by XXXXXX at
+                <br>CATEGORY: BABYSITTING, LOCATION: UPPSALA
+                <br>From: 2014-06-09 to 2014-06-03
+            </h4>
+            <h2 id="job_salary">
+                Salary: 90000KR
+            </h2>
+
+            <p id="job_description">
+                This page contains examples of all the styled elements available as part of this design. Use this page
+                for reference, whilst you build your website.
+            </p>
+
+            <h1>
+                Applicants
+            </h1>
+            <table id="job_applicants" style="width:100%; border-spacing:0;">
+                <tbody>
+                <tr>
+                    <th style="width: 5%;">
+                        ID
+                    </th>
+                    <th style="width: 15%;">
+                        Applicant
+                    </th>
+                    <th style="width: 10%;">
+                        Ratting
+                    </th>
+                    <th style="width: 47%;">
+                        Comments
+                    </th>
+                    <th style="width: 15%;">
+                        Proposed Salary
+                    </th>
+                    <th style="width: 8%;">
+                        Choose
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+            <div id="job_apply">
+                <h1>
+                    Apply for this job
+                </h1>
+
+                <form role="form" method="post" action="#" id="form_apply">
+                    <div class="form-group" style="width: 50%; float: left">
+                        <input name="proposed_salary" type="text" class="form-control" id="proposed_salary"
+                               placeholder="Suggested price" maxlength="40">
+                    </div>
+                    <div class="txtarea" style="width: 100%; float: left">
+                        <textarea name="proposed_comment" rows="10" class="form-control" id="proposed_comment"
+                                  placeholder="add your comments here"></textarea>
+                    </div>
+                    <input name="add_comment" type="hidden" id="add_comment">
+                    <input name="Job_Id" type="hidden" id="Job_Id">
+                    <input name="employer_id" type="hidden" id="employer_id">
+
+                    <div class="form-group" style="width: 70%; float: left">
+                        <input class="submit" type="submit" id="proposed_submit" name="submit" value="Add a comment"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="content_footer"></div>
+    <div id="footer">
+        <div id="location_text">
+            <p>
+                Current Location:
+                <select name="city" id="city">
+                </select>
+            </p>
+        </div>
+        <p>Copyright &copy;2014</p>
+    </div>
+</div>
+</body>
+
+</html>
